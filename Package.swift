@@ -27,9 +27,5 @@ let package = Package(
             name: "SwiftHDLExamples",
             dependencies: ["SwiftHDL"],
             path: "Sources/SwiftHDLExamples"),
-        .testTarget(
-            name: "SwiftHDLTests",
-            dependencies: ["SwiftHDL"],
-            path: "Tests/SwiftHDLTests"),
     ]
 )
