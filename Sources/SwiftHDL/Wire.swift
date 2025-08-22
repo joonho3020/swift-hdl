@@ -1,21 +1,29 @@
 import Foundation
 
 public struct Width {
-    let width: UInt
+    let width: Int
 
-    public init(width: UInt) {
+    public init(width: Int) {
         self.width = width
     }
 
-    public func get() -> UInt {
+    public func get() -> Int {
         self.width
+    }
+}
+
+// Extension to add .W property to Int as well
+extension Int {
+    /// Creates a Width from an Int
+    public var W: Width {
+        return Width(width: Int(self))
     }
 }
 
 public struct HWUInt {
     let width: Width
 
-    public init(width: Width) {
+    public init(_ width: Width) {
         self.width = width
     }
 }
