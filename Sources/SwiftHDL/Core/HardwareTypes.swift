@@ -18,7 +18,7 @@ public extension Core {
 
     // MARK: - Hardware UInt Type
     /// Hardware unsigned integer type with configurable width
-    struct HardwareUInt: Equatable {
+    struct HWUInt: Equatable {
         public let width: Width
         public let value: UInt
 
@@ -79,29 +79,29 @@ public extension Core {
 }
 
 // MARK: - Extensions for convenience
-extension Core.HardwareUInt {
-    public static func + (lhs: Core.HardwareUInt, rhs: Core.HardwareUInt) -> Core.HardwareUInt {
+extension Core.HWUInt {
+    public static func + (lhs: Core.HWUInt, rhs: Core.HWUInt) -> Core.HWUInt {
         let maxWidth = max(lhs.width.value, rhs.width.value)
         let result = lhs.value + rhs.value
-        return Core.HardwareUInt(result, width: Core.Width(maxWidth + 1))
+        return Core.HWUInt(result, width: Core.Width(maxWidth + 1))
     }
 
-    public static func - (lhs: Core.HardwareUInt, rhs: Core.HardwareUInt) -> Core.HardwareUInt {
+    public static func - (lhs: Core.HWUInt, rhs: Core.HWUInt) -> Core.HWUInt {
         let maxWidth = max(lhs.width.value, rhs.width.value)
         let result = lhs.value - rhs.value
-        return Core.HardwareUInt(result, width: Core.Width(maxWidth))
+        return Core.HWUInt(result, width: Core.Width(maxWidth))
     }
 
-    public static func * (lhs: Core.HardwareUInt, rhs: Core.HardwareUInt) -> Core.HardwareUInt {
+    public static func * (lhs: Core.HWUInt, rhs: Core.HWUInt) -> Core.HWUInt {
         let resultWidth = lhs.width.value + rhs.width.value
         let result = lhs.value * rhs.value
-        return Core.HardwareUInt(result, width: Core.Width(resultWidth))
+        return Core.HWUInt(result, width: Core.Width(resultWidth))
     }
 }
 
 // MARK: - Type aliases for common widths
-public typealias UInt1 = Core.HardwareUInt
-public typealias UInt8 = Core.HardwareUInt
-public typealias UInt16 = Core.HardwareUInt
-public typealias UInt32 = Core.HardwareUInt
-public typealias UInt64 = Core.HardwareUInt
+public typealias HWUInt1 = Core.HWUInt
+public typealias HWUInt8 = Core.HWUInt
+public typealias HWUInt16 = Core.HWUInt
+public typealias HWUInt32 = Core.HWUInt
+public typealias HWUInt64 = Core.HWUInt

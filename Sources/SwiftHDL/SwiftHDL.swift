@@ -5,6 +5,6 @@
 
 // Re-export core types for easy access
 public typealias Width = SwiftHDL.Core.Width
-public typealias HardwareUInt = SwiftHDL.Core.HardwareUInt
+public typealias HWUInt = SwiftHDL.Core.HWUInt
 public typealias Wire = SwiftHDL.Core.Wire
 public typealias Reg = SwiftHDL.Core.Reg

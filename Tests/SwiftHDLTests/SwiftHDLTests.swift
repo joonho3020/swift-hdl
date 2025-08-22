@@ -67,13 +67,13 @@ final class SwiftHDLTests: XCTestCase {
     
     func testTypeAliases() {
         // Test that type aliases work correctly
-        let uint8: UInt8 = Core.HardwareUInt(255, width: 8)
-        let uint16: UInt16 = Core.HardwareUInt(65535, width: 16)
+        let hwUInt8: HWUInt8 = Core.HardwareUInt(255, width: 8)
+        let hwUInt16: HWUInt16 = Core.HardwareUInt(65535, width: 16)
         
-        XCTAssertEqual(uint8.value, 255)
-        XCTAssertEqual(uint8.width.value, 8)
-        XCTAssertEqual(uint16.value, 65535)
-        XCTAssertEqual(uint16.width.value, 16)
+        XCTAssertEqual(hwUInt8.value, 255)
+        XCTAssertEqual(hwUInt8.width.value, 8)
+        XCTAssertEqual(hwUInt16.value, 65535)
+        XCTAssertEqual(hwUInt16.width.value, 16)
     }
     
     static var allTests = [
