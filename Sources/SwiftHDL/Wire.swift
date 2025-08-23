@@ -39,7 +39,3 @@ public func + (lhs: Wire<HWUInt>, rhs: Wire<HWUInt>) -> Wire<HWUInt> {
   let w = lhs.value.width
   return Wire(HWUInt(w))
 }
-
-// Re-export the macro attribute for end users
-@attached(member, names: arbitrary)
-public macro BundleDerive() = #externalMacro(module: "BundleDeriveMacros", type: "BundleDerive")
