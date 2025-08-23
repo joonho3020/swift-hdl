@@ -1,40 +1,47 @@
 import Foundation
 
 public struct Width {
-    let width: Int
-
-    public init(width: Int) {
-        self.width = width
-    }
-
-    public func get() -> Int {
-        self.width
-    }
+    public let width: Int
+    public init(_ width: Int) { self.width = width }
 }
 
-// Extension to add .W property to Int as well
-extension Int {
-    /// Creates a Width from an Int
-    public var W: Width {
-        return Width(width: Int(self))
-    }
+public extension Int {
+    var W: Width { Width(self) }
 }
 
-public struct HWUInt {
-    let width: Width
-
-    public init(_ width: Width) {
-        self.width = width
-    }
+public protocol Signal {
+    var bitWidth: Int { get }
 }
 
-public struct Wire<T> {
-    public let value: T
-    public let name: String
+public protocol NumericSignal: Signal {}
 
-    /// Initialize a Wire with a value and optional name
-    public init(_ value: T, name: String = "") {
-        self.value = value
-        self.name = name
-    }
+public struct HWUInt: NumericSignal {
+  public let width: Width
+  public init(_ width: Width) { self.width = width }
+  public var bitWidth: Int { width.width }
 }
+
+public protocol Bundle: Signal {}
+
+@dynamicMemberLookup
+public struct Wire<T: Signal> {
+  public let value: T
+  public let name: String
+  public init(_ value: T, name: String = "") { self.value = value; self.name = name }
+
+  // Generic, no-macro typed projection fallback for any Bundle
+  public subscript<U: Signal>(dynamicMember kp: KeyPath<T, U>) -> Wire<U> where T: Bundle {
+    let v = value[keyPath: kp]
+    return Wire<U>(v, name: name)
+  }
+}
+
+public func + (lhs: Wire<HWUInt>, rhs: Wire<HWUInt>) -> Wire<HWUInt> {
+  let w = lhs.value.width
+  return Wire(HWUInt(w), name: "add(\(lhs.name),\(rhs.name))")
+}
+
+// Re-export the macro attribute for end users
+@attached(member, names: arbitrary)
+@attached(peer, names: arbitrary)
+public macro BundleDerive() = #externalMacro(module: "BundleDeriveMacros", type: "BundleDerive")
