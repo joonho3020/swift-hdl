@@ -2,6 +2,10 @@
 build:
     swift build
 
+[group: 'build']
+debug-build:
+    swift build -Xswiftc -dump-macro-expansions
+
 # [group: 'build']
 # build-release:
 #     swift build --configuration release

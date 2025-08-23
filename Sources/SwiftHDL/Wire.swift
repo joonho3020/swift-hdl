@@ -57,8 +57,6 @@ public struct Wire<T: Signal> {
   public init(_ value: T) { self.value = value }
   init(_ value: T, _ id: NodeId) { self.value = value; self._id = id }
 
-  // FIXME: This calls a constructor of the Wire type every time we access a subfield. We don't want this
-  // Generic, no-macro typed projection fallback for any Bundle
   public subscript<U: Signal>(dynamicMember kp: KeyPath<T, U>) -> Wire<U> where T: Bundle {
     assert(self._id != nil)
     let v = value[keyPath: kp]

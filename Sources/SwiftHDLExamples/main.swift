@@ -52,6 +52,11 @@ print("            sum:", sum)
 
 print(packet.bitWidth)
 
+let c = wp.hdr
+let d = wp.pld
+let e = wp.hdr.hi
+let f = wp.hdr.lo
+
 var x = HWUInt(8.W)
 print(x.bitWidth)
 
