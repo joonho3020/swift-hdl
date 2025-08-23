@@ -27,15 +27,30 @@ public struct BundleDerive: MemberMacro, ExtensionMacro {
 
     // Synthesize `var bitWidth: Int { f1.bitWidth + f2.bitWidth + ... }`
     let sumExpr = fields.isEmpty ? "0" : fields.map { "self.\($0.name).bitWidth" }.joined(separator: " + ")
-
     let bitWidthDecl: DeclSyntax = """
     public var bitWidth: Int { \(raw: sumExpr) }
     """
 
-    return [bitWidthDecl]
+    // public init(hdr: Header, payload: HWUInt) { self.hdr = hdr; self.payload = payload }
+    let initArgsExpr   = fields.isEmpty ? "" : fields.map { "\($0.name): \($0.type)" }.joined(separator: ", ")
+    let assignArgsExpr = fields.isEmpty ? "" : fields.map { "self.\($0.name) = \($0.name)" }.joined(separator: "; ")
+    let initDecl: DeclSyntax = """
+    public init(\(raw: initArgsExpr)) { \(raw: assignArgsExpr) }
+    """
+
+    return [bitWidthDecl, initDecl]
   }
 
-  // Emit an extension on Wire where T == ThisBundle with typed accessors.
+  // FIXME
+  // This macro creates a new Wire every time you access a Bundle subfield.
+  // What we really want is to return a handle to the subfield of the already created Wire node
+  // However, this is nice in that the subfield access returns a typed instance
+  //
+  // extension Wire where T == MyBundle {
+  //   public var field: Wire<F> {
+  //     Wire<F>(self.value.field, name: self.name.isEmpty ? "field" : "\(self.name).field")
+  //   }
+  // }
   public static func expansion(
     of node: AttributeSyntax,
     attachedTo decl: some DeclGroupSyntax,
@@ -73,9 +88,19 @@ public struct BundleDerive: MemberMacro, ExtensionMacro {
 
     return [ext]
   }
+
+  // TODO: extension for elementwise operations?
+  // extension Wire where T == MyBundle {
+  //     public static func + (lhs: Wire, rhs: Wire) -> Wire {
+  //         Wire(MyBundle(
+  //           x: (lhs.x + rhs.x).value,
+  //           y: (lhs.y + rhs.y).value
+  //         ), name: "add(\(lhs.name),\(rhs.name))")
+  //     }
+  //     // same for -, &, |, etc.
+  // }
 }
 
-// MARK: - Helpers
 private func collectStoredProperties(from s: StructDeclSyntax, typeName: String) -> (fields: [(name: String, type: String)], diags: [Diagnostic]) {
   var fields: [(String, String)] = []
   var diags: [Diagnostic] = []

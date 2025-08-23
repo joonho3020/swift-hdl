@@ -23,14 +23,12 @@ public macro BundleDerive() = #externalMacro(module: "BundleDeriveMacros", type:
 public struct Header: Bundle {
   public var lo: HWUInt
   public var hi: HWUInt
-  public init(lo: HWUInt, hi: HWUInt) { self.lo = lo; self.hi = hi }
 }
 
 @BundleDerive
 public struct Packet: Bundle {
   public var hdr: Header
   public var payload: HWUInt
-  public init(hdr: Header, payload: HWUInt) { self.hdr = hdr; self.payload = payload }
 }
 
 // // Generic bundle example
@@ -42,15 +40,16 @@ public struct Packet: Bundle {
 // }
 
 // Demo
-let p = Packet(hdr: Header(lo: HWUInt(8.W), hi: HWUInt(8.W)), payload: HWUInt(32.W))
-let wp = Wire(p)
+let packet = Packet(hdr: Header(lo: HWUInt(8.W), hi: HWUInt(8.W)), payload: HWUInt(32.W))
+let wp = Wire(packet)
 
 // Typed accessors synthesized by the macro (plus the key-path fallback)
 let lo: Wire<HWUInt> = wp.hdr.lo
 let hi: Wire<HWUInt> = wp.hdr.hi
 let sum = lo + hi
 
-print("Packet bitWidth =", p.bitWidth)  // via synthesized member: 8 + 8 + 32 = 48
+print("Packet bitWidth =", packet.bitWidth)  // via synthesized member: 8 + 8 + 32 = 48
+print(packet)
 
 // Generic bundle works too
 // typealias U8 = HWUInt
