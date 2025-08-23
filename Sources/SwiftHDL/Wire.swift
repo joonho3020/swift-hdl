@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Width {
+public struct Width: Equatable {
     public let width: Int
     public init(_ width: Int) { self.width = width }
 }
@@ -23,15 +23,46 @@ public struct HWUInt: NumericSignal {
 
 public protocol Bundle: Signal {}
 
+public struct NodeId: Hashable, Equatable {
+    let id: Int
+    public init(_ id: Int) { self.id = id }
+}
+
+public struct ModuleBuilder {
+    private var _nextId = 0
+    private var intern: [NodeId: Signal] = [:]
+
+    public mutating func nextId() -> NodeId {
+        let ret = NodeId(self._nextId)
+        self._nextId += 1
+        return ret
+    }
+
+    public init() {}
+}
+
 @dynamicMemberLookup
 public struct Wire<T: Signal> {
   public let value: T
-  public init(_ value: T) { self.value = value }
+  var _id: Optional<NodeId> = nil
 
+  public mutating func setId(_ id: NodeId) {
+      self._id = id
+  }
+
+  public func getId() -> Optional<NodeId> {
+      return self._id
+  }
+
+  public init(_ value: T) { self.value = value }
+  init(_ value: T, _ id: NodeId) { self.value = value; self._id = id }
+
+  // FIXME: This calls a constructor of the Wire type every time we access a subfield. We don't want this
   // Generic, no-macro typed projection fallback for any Bundle
   public subscript<U: Signal>(dynamicMember kp: KeyPath<T, U>) -> Wire<U> where T: Bundle {
+    assert(self._id != nil)
     let v = value[keyPath: kp]
-    return Wire<U>(v)
+    return Wire<U>(v, self._id!)
   }
 }
 

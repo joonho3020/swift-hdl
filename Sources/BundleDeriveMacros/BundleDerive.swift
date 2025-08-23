@@ -41,8 +41,7 @@ public struct BundleDerive: MemberMacro, ExtensionMacro {
     return [bitWidthDecl, initDecl]
   }
 
-  // FIXME
-  // This macro creates a new Wire every time you access a Bundle subfield.
+  // FIXME: This macro creates a new Wire every time you access a Bundle subfield.
   // What we really want is to return a handle to the subfield of the already created Wire node
   // However, this is nice in that the subfield access returns a typed instance
   //
@@ -75,7 +74,8 @@ public struct BundleDerive: MemberMacro, ExtensionMacro {
       let ftype = field.type
       return """
       public var \(raw: fname): Wire<\(raw: ftype)> {
-        Wire<\(raw: ftype)>(self.value.\(raw: fname)")
+        assert(self._id != nil)
+        Wire<\(raw: ftype)>(self.value.\(raw: fname)", self._id!)
       }
       """
     }
