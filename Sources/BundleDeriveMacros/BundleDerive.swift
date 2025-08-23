@@ -9,7 +9,7 @@ struct BundleDerivePlugin: CompilerPlugin {
   let providingMacros: [Macro.Type] = [BundleDerive.self]
 }
 
-public struct BundleDerive: MemberMacro, PeerMacro {
+public struct BundleDerive: MemberMacro, ExtensionMacro {
   // Insert members into the annotated type (e.g., fast bitWidth)
   public static func expansion(
     of node: AttributeSyntax,
@@ -35,13 +35,14 @@ public struct BundleDerive: MemberMacro, PeerMacro {
     return [bitWidthDecl]
   }
 
-  // Emit a peer extension on Wire where T == ThisBundle with typed accessors.
+  // Emit an extension on Wire where T == ThisBundle with typed accessors.
   public static func expansion(
     of node: AttributeSyntax,
     attachedTo decl: some DeclGroupSyntax,
-    providingPeersOf _: some DeclGroupSyntax,
+    providingExtensionsOf type: some TypeSyntaxProtocol,
+    conformingTo protocols: [TypeSyntax],
     in context: some MacroExpansionContext
-  ) throws -> [DeclSyntax] {
+  ) throws -> [ExtensionDeclSyntax] {
     guard let s = decl.as(StructDeclSyntax.self) else {
       context.diagnose(Diagnostic(node: Syntax(decl), message: BundleDiag.NotStruct()))
       return []
@@ -64,11 +65,11 @@ public struct BundleDerive: MemberMacro, PeerMacro {
       """
     }
 
-    let ext: DeclSyntax = """
+    let ext = try ExtensionDeclSyntax("""
     extension Wire where T == \(raw: typeWithGenerics) \(raw: genericWhereClause(from: s)) {
       \(raw: accessors.map { $0.description }.joined(separator: "\n"))
     }
-    """
+    """)
 
     return [ext]
   }
