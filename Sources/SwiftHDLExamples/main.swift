@@ -13,23 +13,22 @@ let b = HWUInt(16.W)
 print("HWUInt a: \(a)")
 print("HWUInt b: \(b)")
 
-
 // Re-export the macro attribute for end users
 @attached(member, names: arbitrary)
 public macro BundleDerive() =
-  #externalMacro(module: "BundleDeriveMacros", type: "BundleDerive")
+    #externalMacro(module: "BundleDeriveMacros", type: "BundleDerive")
 
 // Example nested bundles
 @BundleDerive
 struct Header: Bundle {
-  let lo = HWUInt(8.W)
-  let hi = HWUInt(2.W)
+    let lo = HWUInt(8.W)
+    let hi = HWUInt(2.W)
 }
 
 @BundleDerive
 struct Packet: Bundle {
-  let hdr = Header()
-  let pld = HWUInt(32.W)
+    let hdr = Header()
+    let pld = HWUInt(32.W)
 }
 
 // Demo
@@ -50,19 +49,18 @@ print("Header field lo:", lo)
 print("Header field hi:", hi)
 print("            sum:", sum)
 
-print(packet.bitWidth)
-
 let c = wp.hdr
 let d = wp.pld
 let e = wp.hdr.hi
 let f = wp.hdr.lo
 
 var x = HWUInt(8.W)
-print(x.bitWidth)
-
 var y = Header()
-print(y.bitWidth)
 
 assert(packet.bitWidth == 42)
+assert(c.getId() == NodeId(0))
+assert(d.getId() == NodeId(0))
+assert(e.getId() == NodeId(0))
+assert(f.getId() == NodeId(0))
 assert(lo.getId() == NodeId(0))
 assert(hi.getId() == NodeId(0))
