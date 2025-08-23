@@ -1,5 +1,6 @@
 // swift-tools-version: 5.9
 import PackageDescription
+import CompilerPluginSupport
 
 let package = Package(
     name: "SwiftHDL",
@@ -10,9 +11,6 @@ let package = Package(
         .library(
             name: "SwiftHDL",
             targets: ["SwiftHDL"]),
-        .library(
-            name: "BundleDeriveMacros",
-            targets: ["BundleDeriveMacros"]),
         .executable(
             name: "SwiftHDLExamples",
             targets: ["SwiftHDLExamples"]),
@@ -21,11 +19,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-syntax.git", from: "509.0.0")
     ],
     targets: [
-        .target(
-            name: "SwiftHDL",
-            dependencies: [],
-            path: "Sources/SwiftHDL"),
-        .target(
+        .macro(
             name: "BundleDeriveMacros",
             dependencies: [
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
@@ -34,9 +28,13 @@ let package = Package(
                 .product(name: "SwiftDiagnostics", package: "swift-syntax"),
             ]
         ),
+        .target(
+            name: "SwiftHDL",
+            dependencies: ["BundleDeriveMacros"],
+            path: "Sources/SwiftHDL"),
         .executableTarget(
             name: "SwiftHDLExamples",
-            dependencies: ["SwiftHDL"],
+            dependencies: ["SwiftHDL", "BundleDeriveMacros"],
             path: "Sources/SwiftHDLExamples"),
     ]
 )

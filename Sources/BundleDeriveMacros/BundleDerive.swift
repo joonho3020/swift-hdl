@@ -2,13 +2,14 @@ import SwiftCompilerPlugin
 import SwiftDiagnostics
 import SwiftSyntax
 import SwiftSyntaxBuilder
+import SwiftSyntaxMacros
 
 @main
 struct BundleDerivePlugin: CompilerPlugin {
   let providingMacros: [Macro.Type] = [BundleDerive.self]
 }
 
-public struct BundleDerive: MemberMacro {
+public struct BundleDerive: MemberMacro, PeerMacro {
   // Insert members into the annotated type (e.g., fast bitWidth)
   public static func expansion(
     of node: AttributeSyntax,
@@ -20,7 +21,7 @@ public struct BundleDerive: MemberMacro {
       return []
     }
 
-    let typeName = s.identifier.text
+    let typeName = s.name.text
     let (fields, diags) = collectStoredProperties(from: s, typeName: typeName)
     diags.forEach { context.diagnose($0) }
 
@@ -32,6 +33,44 @@ public struct BundleDerive: MemberMacro {
     """
 
     return [bitWidthDecl]
+  }
+
+  // Emit a peer extension on Wire where T == ThisBundle with typed accessors.
+  public static func expansion(
+    of node: AttributeSyntax,
+    attachedTo decl: some DeclGroupSyntax,
+    providingPeersOf _: some DeclGroupSyntax,
+    in context: some MacroExpansionContext
+  ) throws -> [DeclSyntax] {
+    guard let s = decl.as(StructDeclSyntax.self) else {
+      context.diagnose(Diagnostic(node: Syntax(decl), message: BundleDiag.NotStruct()))
+      return []
+    }
+
+    let typeName = s.name.text
+    let typeWithGenerics = typeName + genericArgumentList(from: s)
+
+    let (fields, diags) = collectStoredProperties(from: s, typeName: typeName)
+    diags.forEach { context.diagnose($0) }
+
+    // Build properties: one computed property per stored field.
+    let accessors: [DeclSyntax] = fields.map { field in
+      let fname = field.name
+      let ftype = field.type
+      return """
+      public var \(raw: fname): Wire<\(raw: ftype)> {
+        Wire<\(raw: ftype)>(self.value.\(raw: fname)")
+      }
+      """
+    }
+
+    let ext: DeclSyntax = """
+    extension Wire where T == \(raw: typeWithGenerics) \(raw: genericWhereClause(from: s)) {
+      \(raw: accessors.map { $0.description }.joined(separator: "\n"))
+    }
+    """
+
+    return [ext]
   }
 }
 
@@ -74,7 +113,7 @@ private func isSelfType(tyString: String, typeName: String) -> Bool {
 
 private func genericArgumentList(from s: StructDeclSyntax) -> String {
   // Rebuild `Foo<A,B>` from the generic parameter clause, if any.
-  guard let params = s.genericParameterClause?.genericParameterList else { return "" }
+  guard let params = s.genericParameterClause?.parameters else { return "" }
   let names = params.map { $0.name.text }.joined(separator: ", ")
   return names.isEmpty ? "" : "<\(names)>"
 }

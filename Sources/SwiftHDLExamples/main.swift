@@ -14,6 +14,10 @@ print("HWUInt a: \(a)")
 print("HWUInt b: \(b)")
 
 
+// Re-export the macro attribute for end users
+@attached(member, names: arbitrary)
+public macro BundleDerive() = #externalMacro(module: "BundleDeriveMacros", type: "BundleDerive")
+
 // Example nested bundles
 @BundleDerive
 public struct Header: Bundle {
@@ -39,7 +43,7 @@ public struct Packet: Bundle {
 
 // Demo
 let p = Packet(hdr: Header(lo: HWUInt(8.W), hi: HWUInt(8.W)), payload: HWUInt(32.W))
-let wp = Wire(p, name: "p")
+let wp = Wire(p)
 
 // Typed accessors synthesized by the macro (plus the key-path fallback)
 let lo: Wire<HWUInt> = wp.hdr.lo
@@ -47,7 +51,6 @@ let hi: Wire<HWUInt> = wp.hdr.hi
 let sum = lo + hi
 
 print("Packet bitWidth =", p.bitWidth)  // via synthesized member: 8 + 8 + 32 = 48
-print(sum.name)                          // add(p.hdr.lo,p.hdr.hi)
 
 // Generic bundle works too
 // typealias U8 = HWUInt
