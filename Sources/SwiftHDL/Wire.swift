@@ -9,16 +9,13 @@ public extension Int {
     var W: Width { Width(self) }
 }
 
-public protocol Signal {
-    var bitWidth: Int { get }
-}
+public protocol Signal {}
 
 public protocol NumericSignal: Signal {}
 
 public struct HWUInt: NumericSignal {
     public let width: Width
     public init(_ width: Width) { self.width = width }
-    public var bitWidth: Int { width.width }
 }
 
 public protocol Bundle: Signal {}
